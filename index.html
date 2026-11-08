@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>美客多授权回调</title>
+<style>
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+         background:#f5f6f8; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; color:#1a1a1a; }
+  .card { background:#fff; border:1px solid #e3e5e9; border-radius:12px; padding:28px 32px; max-width:620px; width:calc(100% - 48px); }
+  h1 { font-size:16px; font-weight:600; margin:0 0 6px; }
+  p { font-size:13px; line-height:1.7; color:#5f6368; margin:0 0 16px; }
+  .code { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:15px; word-break:break-all;
+          background:#f1f3f5; border:1px solid #e3e5e9; border-radius:8px; padding:14px; margin-bottom:14px; user-select:all; }
+  button { font-size:13px; padding:9px 18px; border-radius:8px; border:1px solid #1a1a1a;
+           background:#1a1a1a; color:#fff; cursor:pointer; }
+  button:active { transform:translateY(1px); }
+  .ok { color:#0f6e56; } .bad { color:#a32d2d; }
+  .hint { font-size:12px; color:#8a8f98; margin-top:14px; }
+  code { font-family:ui-monospace,Menlo,Consolas,monospace; background:#f1f3f5; padding:1px 5px; border-radius:4px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1 id="title">美客多授权回调</h1>
+  <p id="desc">正在解析授权结果…</p>
+  <div class="code" id="code" hidden></div>
+  <button id="copy" hidden>复制授权码</button>
+  <p class="hint">拿到授权码后，在本机执行：<br><code>python ml_scan.py token --code 粘贴授权码</code></p>
+</div>
+<script>
+  var q = new URLSearchParams(location.search);
+  var code = q.get("code");
+  var err = q.get("error");
+  var title = document.getElementById("title");
+  var desc = document.getElementById("desc");
+  var box = document.getElementById("code");
+  var btn = document.getElementById("copy");
+
+  if (code) {
+    title.textContent = "授权成功";
+    title.className = "ok";
+    desc.textContent = "下面是授权码，点按钮复制，粘回终端换取 token。有效期约 10 分钟，用一次即失效。";
+    box.textContent = code;
+    box.hidden = false;
+    btn.hidden = false;
+    btn.onclick = function () {
+      navigator.clipboard.writeText(code).then(function () {
+        btn.textContent = "已复制";
+        setTimeout(function () { btn.textContent = "复制授权码"; }, 1500);
+      });
+    };
+  } else if (err) {
+    title.textContent = "授权未完成";
+    title.className = "bad";
+    desc.textContent = "平台返回错误：" + err + "。常见原因：回调地址与应用登记不一致、不是店铺主账号、或应用未关联开发者账户。";
+  } else {
+    desc.textContent = "地址栏里没有 code 参数。这个页面只用于接收美客多 OAuth 回调，直接打开不会有内容。";
+  }
+</script>
+</body>
+</html>
